@@ -9,7 +9,7 @@ export class DBServices{
         .setProject(config.appwriteProjectId);
         this.databases = new Databases(this.client);
     }
-    async createArticle({title, content, featuredImage, status, slug, userId}){
+    async createArticle({title, content, featuredImage, status, slug, userId, authorName}){
         try {
             return await this.databases.createDocument({
                 databaseId: config.appwriteDatabaseId,
@@ -20,7 +20,8 @@ export class DBServices{
                 content,
                 featuredImage,
                 status,
-                userId
+                userId,
+                authorName
                 }
 
         });

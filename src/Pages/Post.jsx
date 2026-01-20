@@ -67,11 +67,11 @@ export default function Post() {
                         <div className='flex flex-col sm:flex-row sm:items-center gap-4 text-[#4b4f58] dark:text-[#a7adbe] pb-6 border-b border-black/5 dark:border-white/10'>
                             <div className='flex items-center gap-3'>
                                 <div className='w-11 h-11 rounded-full bg-[#111318] dark:bg-white/10 text-white dark:text-[#f5f6fb] flex items-center justify-center font-semibold text-lg shadow-sm'>
-                                    {userData.name?.[0]?.toUpperCase() || 'A'}
+                                    {post.authorName?.[0]?.toUpperCase() || 'A'}
                                 </div>
                                 <div>
                                     <p className='font-semibold text-[#0f1116] dark:text-[#f5f6fb]'>Author</p>
-                                    <p className='text-sm text-[#5a5e68] dark:text-[#b5bdd3]'>by {userData.name} {userData.lastname}</p>
+                                    <p className='text-sm text-[#5a5e68] dark:text-[#b5bdd3]'>by {post.authorName || 'Anonymous'}</p>
                                 </div>
                             </div>
                             <div className='flex items-center gap-2 text-sm'>

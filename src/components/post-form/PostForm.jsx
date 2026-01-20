@@ -52,7 +52,11 @@ function PostForm({post}) {
                 if (file) {
                     const fileId = file.$id;
                     data.featuredImage = fileId;
-                    const dbPost = await dbServices.createArticle({ ...data, userId: userData.$id });
+                    const dbPost = await dbServices.createArticle({ 
+                        ...data, 
+                        userId: userData.$id,
+                        authorName: userData.name || 'Anonymous'
+                    });
 
                     if (dbPost) {
                         dispatch(addPost(dbPost));
