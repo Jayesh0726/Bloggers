@@ -18,15 +18,14 @@ function Home() {
     const loading = useSelector((state) => state.post.loading)
 
     useEffect(() => {
-        if (posts.length === 0) {
-            dispatch(setLoading(true))
-            dbConfig.listArticles([]).then((response) => {
-                if (response) {
-                    dispatch(setPosts(response.documents))
-                }
-            }).finally(() => dispatch(setLoading(false)))
-        }
-    }, [])
+        // Always fetch posts when Home component mounts
+        dispatch(setLoading(true))
+        dbConfig.listArticles([]).then((response) => {
+            if (response) {
+                dispatch(setPosts(response.documents))
+            }
+        }).finally(() => dispatch(setLoading(false)))
+    }, [dispatch])
 
     return (
         <div className='w-full'>
@@ -45,7 +44,7 @@ function Home() {
                 </section>
             )}
 
-            {posts.length > 0 && (
+            {authStatus && posts.length > 0 && (
                 <section className='pb-16 sm:pb-20 md:pb-28 lg:pb-32'>
                     <Container>
                         {loading ? (

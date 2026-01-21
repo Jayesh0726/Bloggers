@@ -7,6 +7,10 @@ import store from './store/store.js'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Home from './Pages/Home.jsx'
 import { AuthLayout, Login } from './components/index.js'
+import Profile from './Pages/Profile.jsx'
+import NotFound from './Pages/NotFound.jsx'
+import ForgotPassword from './Pages/ForgotPassword.jsx'
+import ResetPassword from './Pages/ResetPassword.jsx'
 
 
 import AddPost from "./Pages/AddPost";
@@ -72,6 +76,34 @@ const router = createBrowserRouter([
             path: "/post/:slug",
             element: <Post />,
         },
+        {
+            path: "/profile",
+            element: (
+                <AuthLayout authentication>
+                    <Profile />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/forgot-password",
+            element: (
+                <AuthLayout authentication={false}>
+                    <ForgotPassword />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "/reset-password",
+            element: (
+                <AuthLayout authentication={false}>
+                    <ResetPassword />
+                </AuthLayout>
+            ),
+        },
+        {
+            path: "*",
+            element: <NotFound />,
+        }
     ],
 },
 ])

@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronDownIcon } from 'lucide-react'
+import { ChevronDownIcon, Chrome } from 'lucide-react'
 import authService from '../appwrite/auth'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
-import { login } from '../store/authSlice'
+import { login, setOAuth2Session } from '../store/authSlice'
 import { InputBox, Button, Logo, PasswordInput } from './index'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Calendar } from './ui/calendar'
@@ -19,7 +19,42 @@ function Signup() {
   const [error, setError] = useState("")
   const [selectedDate, setSelectedDate] = useState(undefined)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false)
   const password = watch("password")
+
+  // Check for OAuth callback
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      try {
+        // Add a small delay to ensure Appwrite has set the session cookie
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const user = await authService.getUserSession()
+        if (user) {
+          // Check if this is an OAuth session by looking for OAuth provider info
+          dispatch(setOAuth2Session({ 
+            userData: user, 
+            session: user,
+            provider: 'google'
+          }))
+          navigate("/")
+        }
+      } catch (err) {
+        console.error("OAuth callback error:", err)
+      }
+    }
+    handleOAuthCallback()
+  }, [dispatch, navigate])
+
+  const handleGoogleLogin = async () => {
+    setIsLoadingGoogle(true)
+    try {
+      await authService.loginWithGoogle()
+    } catch (err) {
+      setError(err.message)
+      setIsLoadingGoogle(false)
+    }
+  }
 
   const createUser = async (data) => {
     setError("")
@@ -56,7 +91,7 @@ function Signup() {
         <CardHeader className='text-center'>
           <div className='flex justify-center mb-4'>
             <div className='p-3 rounded-lg border bg-background'>
-              <Logo width='80px' />
+              <Logo width='auto' />
             </div>
           </div>
           <CardTitle className='text-3xl'>Join Our Community</CardTitle>
@@ -71,6 +106,36 @@ function Signup() {
           )}
 
           <form onSubmit={handleSubmit(createUser)} className='space-y-4'>
+            <Button
+              type='button'
+              variant='outline'
+              size='lg'
+              className='w-full'
+              onClick={handleGoogleLogin}
+              disabled={isLoadingGoogle || isSubmitting}
+            >
+              {isLoadingGoogle ? (
+                <>
+                  <Spinner className="mr-2 size-4" />
+                  Signing up with Google...
+                </>
+              ) : (
+                <>
+                  <Chrome className="mr-2 size-4" />
+                  Sign up with Google
+                </>
+              )}
+            </Button>
+
+            <div className='relative'>
+              <div className='absolute inset-0 flex items-center'>
+                <div className='w-full border-t'></div>
+              </div>
+              <div className='relative flex justify-center text-xs uppercase'>
+                <span className='bg-background px-2 text-muted-foreground'>Or sign up with email</span>
+              </div>
+            </div>
+
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               <InputBox
                 label='First Name'
