@@ -29,43 +29,78 @@ function PostForm({post}) {
             return;
         }
 
+        // Validate required fields
+        if (!data.title || !data.title.trim()) {
+            console.error("Title is required");
+            alert("Please enter a title");
+            return;
+        }
+
+        if (!data.content || !data.content.trim()) {
+            console.error("Content is required");
+            alert("Please enter content");
+            return;
+        }
+
         try {
             if (post) {
-                const file = data.image[0] ? await fileservices.uploadFile(data.image[0]) : null;
+                // Update existing post
+                let featuredImage = post.featuredImage;
 
-                if (file) {
-                    fileservices.deleteFile(post.featuredImage);
+                // Handle new image upload if provided
+                if (data.image && data.image[0]) {
+                    const file = await fileservices.uploadFile(data.image[0]);
+                    if (file) {
+                        featuredImage = file.$id;
+                        // Delete old image
+                        await fileservices.deleteFile(post.featuredImage);
+                    }
                 }
 
                 const dbPost = await dbServices.updateArticle(post.$id, {
-                    ...data,
-                    featuredImage: file ? file.$id : undefined,
+                    title: data.title,
+                    content: data.content,
+                    status: data.status,
+                    featuredImage: featuredImage,
                 });
 
                 if (dbPost) {
                     dispatch(updatePost(dbPost));
+                    alert("Post updated successfully!");
                     navigate(`/post/${dbPost.$id}`);
                 }
             } else {
+                // Create new post
+                if (!data.image || !data.image[0]) {
+                    console.error("Featured image is required");
+                    alert("Please select a featured image");
+                    return;
+                }
+
                 const file = await fileservices.uploadFile(data.image[0]);
+                if (!file) {
+                    throw new Error("Failed to upload image");
+                }
 
-                if (file) {
-                    const fileId = file.$id;
-                    data.featuredImage = fileId;
-                    const dbPost = await dbServices.createArticle({ 
-                        ...data, 
-                        userId: userData.$id,
-                        authorName: userData.name || 'Anonymous'
-                    });
+                const dbPost = await dbServices.createArticle({
+                    title: data.title,
+                    content: data.content,
+                    slug: data.slug,
+                    status: data.status,
+                    featuredImage: file.$id,
+                    userId: userData.$id,
+                    authorName: userData.name || 'Anonymous'
+                });
 
-                    if (dbPost) {
-                        dispatch(addPost(dbPost));
-                        navigate(`/post/${dbPost.$id}`);
-                    }
+                if (dbPost) {
+                    dispatch(addPost(dbPost));
+                    alert("Post created successfully!");
+                    navigate(`/post/${dbPost.$id}`);
                 }
             }
         } catch (error) {
             console.error("Error submitting post:", error);
+            alert(`Error: ${error.message || 'Failed to submit post'}`);
         }
     };
 
