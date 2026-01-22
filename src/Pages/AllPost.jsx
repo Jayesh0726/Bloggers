@@ -25,15 +25,16 @@ function AllPosts() {
             return;
         }
 
-        if (userPosts.length === 0) {
-            dispatch(setLoading(true));
-            dbServices.listArticles([Query.equal("userId", userData.$id)]).then((response) => {
-                if (response) {
-                    dispatch(setPosts(response.documents));
-                }
-            }).finally(() => dispatch(setLoading(false)));
-        }
-    }, [userData, userPosts.length, dispatch])
+        // Always fetch posts for the logged-in user
+        dispatch(setLoading(true));
+        dbServices.listArticles([Query.equal("userId", userData.$id)]).then((response) => {
+            if (response) {
+                dispatch(setPosts(response.documents));
+            }
+        }).catch((error) => {
+            console.error("Error fetching user posts:", error);
+        }).finally(() => dispatch(setLoading(false)));
+    }, [userData, dispatch])
 
     return (
         <div className='w-full'>
